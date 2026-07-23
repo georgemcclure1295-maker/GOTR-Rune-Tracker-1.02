@@ -29,14 +29,16 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.Text;
+import java.io.IOException;
+import java.util.Objects;
+import javax.imageio.ImageIO;
 
 @PluginDescriptor(
         name = "GOTR Rune Tracker",
         description = "Tracks runes crafted during Guardians of the Rift",
         tags = {"gotr", "guardians of the rift", "runecraft", "runes", "tracker"}
 )
-public class GotrRuneTrackerPlugin extends Plugin
-{
+public class GotrRuneTrackerPlugin extends Plugin {
     @Inject
     private Client client;
 
@@ -61,14 +63,12 @@ public class GotrRuneTrackerPlugin extends Plugin
     private boolean waitingForNextGameStart;
 
     @Provides
-    GotrRuneTrackerConfig provideConfig(ConfigManager configManager)
-    {
+    GotrRuneTrackerConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(GotrRuneTrackerConfig.class);
     }
 
     @Override
-    protected void startUp()
-    {
+    protected void startUp() {
         initialiseRunes();
         initialiseTotals();
 
@@ -81,7 +81,7 @@ public class GotrRuneTrackerPlugin extends Plugin
 
             navigationButton = NavigationButton.builder()
                     .tooltip("GOTR Rune Tracker")
-                    .icon(createNavigationIcon())
+                    .icon(loadIcon())
                     .priority(5)
                     .panel(panel)
                     .build();
@@ -98,10 +98,8 @@ public class GotrRuneTrackerPlugin extends Plugin
     }
 
     @Override
-    protected void shutDown()
-    {
-        if (navigationButton != null)
-        {
+    protected void shutDown() {
+        if (navigationButton != null) {
             clientToolbar.removeNavigation(navigationButton);
         }
 
@@ -117,15 +115,13 @@ public class GotrRuneTrackerPlugin extends Plugin
         waitingForNextGameStart = false;
     }
 
-    private boolean isActuallyInsideGotr()
-    {
+    private boolean isActuallyInsideGotr() {
         Widget gotrDisplay = client.getWidget(ComponentID.GOTR_DISPLAY);
         return gotrDisplay != null && !gotrDisplay.isHidden();
     }
 
     @Subscribe
-    public void onGameTick(GameTick event)
-    {
+    public void onGameTick(GameTick event) {
         /*
          * GOTR_DISPLAY disappears while visiting rune altars, so it must not
          * be used to decide that the player has left the game.
@@ -136,45 +132,38 @@ public class GotrRuneTrackerPlugin extends Plugin
          */
         if (!gotrGameActive
                 && !waitingForNextGameStart
-                && isActuallyInsideGotr())
-        {
+                && isActuallyInsideGotr()) {
             beginGameTracking();
         }
     }
 
     @Subscribe
-    public void onItemContainerChanged(ItemContainerChanged event)
-    {
-        if (event.getContainerId() != InventoryID.INVENTORY.getId())
-        {
+    public void onItemContainerChanged(ItemContainerChanged event) {
+        if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
             return;
         }
 
         ItemContainer inventory = event.getItemContainer();
-        if (inventory == null)
-        {
+        if (inventory == null) {
             return;
         }
 
         Map<Integer, Integer> newRuneCounts = countRunes(inventory);
 
-        if (!gotrGameActive)
-        {
+        if (!gotrGameActive) {
             previousRuneCounts.clear();
             previousRuneCounts.putAll(newRuneCounts);
             return;
         }
 
-        for (Map.Entry<Integer, String> rune : runeNames.entrySet())
-        {
+        for (Map.Entry<Integer, String> rune : runeNames.entrySet()) {
             int itemId = rune.getKey();
             String runeName = rune.getValue();
             int previousAmount = previousRuneCounts.getOrDefault(itemId, 0);
             int newAmount = newRuneCounts.getOrDefault(itemId, 0);
             int gained = newAmount - previousAmount;
 
-            if (gained > 0)
-            {
+            if (gained > 0) {
                 currentGameTotals.merge(runeName, gained, Integer::sum);
                 sessionTotals.merge(runeName, gained, Integer::sum);
             }
@@ -186,17 +175,14 @@ public class GotrRuneTrackerPlugin extends Plugin
     }
 
     @Subscribe
-    public void onChatMessage(ChatMessage event)
-    {
-        if (event.getType() != ChatMessageType.GAMEMESSAGE)
-        {
+    public void onChatMessage(ChatMessage event) {
+        if (event.getType() != ChatMessageType.GAMEMESSAGE) {
             return;
         }
 
         String message = Text.removeTags(event.getMessage()).toLowerCase().trim();
 
-        if (message.contains("the rift becomes active"))
-        {
+        if (message.contains("the rift becomes active")) {
             waitingForNextGameStart = false;
             beginGameTracking();
             return;
@@ -206,14 +192,12 @@ public class GotrRuneTrackerPlugin extends Plugin
                 message.contains("the great guardian successfully closed the rift")
                         || message.contains("the rift has been subdued");
 
-        if (!gameCompletedMessage || !gotrGameActive)
-        {
+        if (!gameCompletedMessage || !gotrGameActive) {
             return;
         }
 
         int currentTick = client.getTickCount();
-        if (lastCompletedGameTick != -1 && currentTick - lastCompletedGameTick <= 2)
-        {
+        if (lastCompletedGameTick != -1 && currentTick - lastCompletedGameTick <= 2) {
             return;
         }
 
@@ -221,10 +205,8 @@ public class GotrRuneTrackerPlugin extends Plugin
         completeGameAutomatically();
     }
 
-    private void beginGameTracking()
-    {
-        if (gotrGameActive)
-        {
+    private void beginGameTracking() {
+        if (gotrGameActive) {
             return;
         }
 
@@ -242,10 +224,8 @@ public class GotrRuneTrackerPlugin extends Plugin
         );
     }
 
-    private void completeGameAutomatically()
-    {
-        for (String runeName : runeNames.values())
-        {
+    private void completeGameAutomatically() {
+        for (String runeName : runeNames.values()) {
             completedGameTotals.merge(
                     runeName,
                     currentGameTotals.getOrDefault(runeName, 0),
@@ -267,8 +247,7 @@ public class GotrRuneTrackerPlugin extends Plugin
         );
     }
 
-    private void startNewGame()
-    {
+    private void startNewGame() {
         clientThread.invokeLater(() ->
         {
             clearCurrentGameTotals();
@@ -285,16 +264,14 @@ public class GotrRuneTrackerPlugin extends Plugin
         });
     }
 
-    private void resetSession()
-    {
+    private void resetSession() {
         clientThread.invokeLater(() ->
         {
             gamesCompleted = 0;
             lastCompletedGameTick = -1;
             clearCurrentGameTotals();
 
-            for (String runeName : runeNames.values())
-            {
+            for (String runeName : runeNames.values()) {
                 sessionTotals.put(runeName, 0);
                 completedGameTotals.put(runeName, 0);
             }
@@ -313,8 +290,7 @@ public class GotrRuneTrackerPlugin extends Plugin
         });
     }
 
-    private void initialiseRunes()
-    {
+    private void initialiseRunes() {
         runeNames.clear();
         runeNames.put(ItemID.AIR_RUNE, "Air");
         runeNames.put(ItemID.MIND_RUNE, "Mind");
@@ -330,14 +306,12 @@ public class GotrRuneTrackerPlugin extends Plugin
         runeNames.put(ItemID.BLOOD_RUNE, "Blood");
     }
 
-    private void initialiseTotals()
-    {
+    private void initialiseTotals() {
         currentGameTotals.clear();
         sessionTotals.clear();
         completedGameTotals.clear();
 
-        for (String runeName : runeNames.values())
-        {
+        for (String runeName : runeNames.values()) {
             currentGameTotals.put(runeName, 0);
             sessionTotals.put(runeName, 0);
             completedGameTotals.put(runeName, 0);
@@ -349,37 +323,29 @@ public class GotrRuneTrackerPlugin extends Plugin
         waitingForNextGameStart = false;
     }
 
-    private void clearCurrentGameTotals()
-    {
-        for (String runeName : runeNames.values())
-        {
+    private void clearCurrentGameTotals() {
+        for (String runeName : runeNames.values()) {
             currentGameTotals.put(runeName, 0);
         }
     }
 
-    private void snapshotCurrentInventory()
-    {
+    private void snapshotCurrentInventory() {
         ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
         previousRuneCounts.clear();
 
-        if (inventory != null)
-        {
+        if (inventory != null) {
             previousRuneCounts.putAll(countRunes(inventory));
         }
     }
 
-    private Map<Integer, Integer> countRunes(ItemContainer inventory)
-    {
+    private Map<Integer, Integer> countRunes(ItemContainer inventory) {
         Map<Integer, Integer> counts = new HashMap<>();
-        if (inventory == null)
-        {
+        if (inventory == null) {
             return counts;
         }
 
-        for (Item item : inventory.getItems())
-        {
-            if (item == null || !runeNames.containsKey(item.getId()))
-            {
+        for (Item item : inventory.getItems()) {
+            if (item == null || !runeNames.containsKey(item.getId())) {
                 continue;
             }
 
@@ -389,12 +355,10 @@ public class GotrRuneTrackerPlugin extends Plugin
         return counts;
     }
 
-    private Map<String, Double> calculateAverages()
-    {
+    private Map<String, Double> calculateAverages() {
         Map<String, Double> averages = new LinkedHashMap<>();
 
-        for (String runeName : runeNames.values())
-        {
+        for (String runeName : runeNames.values()) {
             double average = gamesCompleted == 0
                     ? 0.0
                     : completedGameTotals.getOrDefault(runeName, 0) / (double) gamesCompleted;
@@ -404,10 +368,8 @@ public class GotrRuneTrackerPlugin extends Plugin
         return averages;
     }
 
-    private void refreshPanel()
-    {
-        if (panel == null)
-        {
+    private void refreshPanel() {
+        if (panel == null) {
             return;
         }
 
@@ -423,25 +385,15 @@ public class GotrRuneTrackerPlugin extends Plugin
         });
     }
 
-    private BufferedImage createNavigationIcon()
-    {
-        int size = 32;
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = image.createGraphics();
-
-        graphics.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
-        );
-
-        graphics.setColor(new Color(35, 35, 35));
-        graphics.fillOval(1, 1, 30, 30);
-        graphics.setColor(new Color(90, 170, 255));
-        graphics.fillOval(6, 6, 20, 20);
-        graphics.setColor(new Color(220, 240, 255));
-        graphics.fillOval(11, 11, 10, 10);
-        graphics.dispose();
-
-        return image;
+    private BufferedImage loadIcon() {
+        try {
+            return ImageIO.read(
+                    Objects.requireNonNull(
+                            getClass().getResourceAsStream("/gotr_rune_tracker_icon.png")
+                    )
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to load plugin icon.", e);
+        }
     }
 }
