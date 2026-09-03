@@ -21,26 +21,39 @@ import net.runelite.client.ui.PluginPanel;
 
 public class GotrRuneTrackerPanel extends PluginPanel
 {
-    private static final Color ACCENT = new Color(90, 170, 255);
-    private static final Color MUTED = new Color(160, 160, 160);
-    private static final Color ZERO_VALUE = new Color(120, 120, 120);
+    private static final Color ACCENT =
+            new Color(90, 170, 255);
+
+    private static final Color MUTED =
+            new Color(160, 160, 160);
+
+    private static final Color ZERO_VALUE =
+            new Color(120, 120, 120);
 
     private static final DecimalFormat AVERAGE_FORMAT =
             new DecimalFormat("0.0");
 
     private static final String[] RUNES =
-    {
-            "Air", "Mind",
-            "Water", "Earth",
-            "Fire", "Body",
-            "Cosmic", "Chaos",
-            "Nature", "Law",
-            "Death", "Blood",
-
-            "Mist", "Dust",
-            "Mud", "Smoke",
-            "Steam", "Lava"
-    };
+            {
+                    "Air",
+                    "Mind",
+                    "Water",
+                    "Earth",
+                    "Fire",
+                    "Body",
+                    "Cosmic",
+                    "Chaos",
+                    "Nature",
+                    "Law",
+                    "Death",
+                    "Blood",
+                    "Mist",
+                    "Dust",
+                    "Mud",
+                    "Smoke",
+                    "Steam",
+                    "Lava"
+            };
 
     private final Map<String, JLabel> currentGameLabels =
             new LinkedHashMap<>();
@@ -77,24 +90,35 @@ public class GotrRuneTrackerPanel extends PluginPanel
         setLayout(new BorderLayout());
 
         setBorder(
-                new EmptyBorder(12, 12, 12, 12)
+                new EmptyBorder(
+                        12,
+                        12,
+                        12,
+                        12
+                )
         );
 
         setBackground(
                 ColorScheme.DARK_GRAY_COLOR
         );
 
-        JPanel mainPanel = new JPanel();
+        JPanel mainPanel =
+                new JPanel();
 
         mainPanel.setLayout(
-                new BoxLayout(mainPanel, BoxLayout.Y_AXIS)
+                new BoxLayout(
+                        mainPanel,
+                        BoxLayout.Y_AXIS
+                )
         );
 
         mainPanel.setBackground(
                 ColorScheme.DARK_GRAY_COLOR
         );
 
-        mainPanel.add(createHeaderPanel());
+        mainPanel.add(
+                createHeaderPanel()
+        );
 
         mainPanel.add(
                 Box.createRigidArea(
@@ -144,16 +168,22 @@ public class GotrRuneTrackerPanel extends PluginPanel
                 )
         );
 
-        mainPanel.add(createButtonPanel());
+        mainPanel.add(
+                createButtonPanel()
+        );
 
-        add(mainPanel, BorderLayout.NORTH);
+        add(
+                mainPanel,
+                BorderLayout.NORTH
+        );
 
         styleButtons();
     }
 
     private JPanel createHeaderPanel()
     {
-        JPanel headerPanel = new JPanel();
+        JPanel headerPanel =
+                new JPanel();
 
         headerPanel.setLayout(
                 new BoxLayout(
@@ -233,8 +263,13 @@ public class GotrRuneTrackerPanel extends PluginPanel
                 )
         );
 
-        headerPanel.add(titleLabel);
-        headerPanel.add(statsPanel);
+        headerPanel.add(
+                titleLabel
+        );
+
+        headerPanel.add(
+                statsPanel
+        );
 
         return headerPanel;
     }
@@ -243,7 +278,8 @@ public class GotrRuneTrackerPanel extends PluginPanel
             String title,
             JLabel valueLabel)
     {
-        JPanel panel = new JPanel();
+        JPanel panel =
+                new JPanel();
 
         panel.setLayout(
                 new BoxLayout(
@@ -314,7 +350,9 @@ public class GotrRuneTrackerPanel extends PluginPanel
                         )
         );
 
-        panel.add(titleLabel);
+        panel.add(
+                titleLabel
+        );
 
         panel.add(
                 Box.createRigidArea(
@@ -322,7 +360,9 @@ public class GotrRuneTrackerPanel extends PluginPanel
                 )
         );
 
-        panel.add(valueLabel);
+        panel.add(
+                valueLabel
+        );
 
         return panel;
     }
@@ -359,7 +399,9 @@ public class GotrRuneTrackerPanel extends PluginPanel
         );
 
         JLabel sectionTitle =
-                new JLabel(title);
+                new JLabel(
+                        title
+                );
 
         sectionTitle.setFont(
                 sectionTitle
@@ -428,7 +470,9 @@ public class GotrRuneTrackerPanel extends PluginPanel
         );
 
         JLabel totalTextLabel =
-                new JLabel("Total");
+                new JLabel(
+                        "Total"
+                );
 
         totalTextLabel.setFont(
                 totalTextLabel
@@ -454,8 +498,13 @@ public class GotrRuneTrackerPanel extends PluginPanel
                 Color.WHITE
         );
 
-        totalPanel.add(totalTextLabel);
-        totalPanel.add(totalLabel);
+        totalPanel.add(
+                totalTextLabel
+        );
+
+        totalPanel.add(
+                totalLabel
+        );
 
         sectionPanel.add(
                 sectionTitle,
@@ -481,7 +530,9 @@ public class GotrRuneTrackerPanel extends PluginPanel
             String runeName)
     {
         JLabel nameLabel =
-                new JLabel(runeName);
+                new JLabel(
+                        runeName
+                );
 
         nameLabel.setForeground(
                 new Color(
@@ -499,8 +550,13 @@ public class GotrRuneTrackerPanel extends PluginPanel
                 amountLabel
         );
 
-        panel.add(nameLabel);
-        panel.add(amountLabel);
+        panel.add(
+                nameLabel
+        );
+
+        panel.add(
+                amountLabel
+        );
     }
 
     private JLabel createAmountLabel()
@@ -534,26 +590,38 @@ public class GotrRuneTrackerPanel extends PluginPanel
                 ColorScheme.DARK_GRAY_COLOR
         );
 
-        buttonPanel.add(newGameButton);
-        buttonPanel.add(resetSessionButton);
+        buttonPanel.add(
+                newGameButton
+        );
+
+        buttonPanel.add(
+                resetSessionButton
+        );
 
         return buttonPanel;
     }
 
     private void styleButtons()
     {
-        newGameButton.setFocusPainted(false);
-        resetSessionButton.setFocusPainted(false);
+        newGameButton.setFocusPainted(
+                false
+        );
+
+        resetSessionButton.setFocusPainted(
+                false
+        );
     }
 
-    public void setNewGameAction(Runnable action)
+    public void setNewGameAction(
+            Runnable action)
     {
         newGameButton.addActionListener(
                 event -> action.run()
         );
     }
 
-    public void setResetSessionAction(Runnable action)
+    public void setResetSessionAction(
+            Runnable action)
     {
         resetSessionButton.addActionListener(
                 event -> action.run()
@@ -672,7 +740,9 @@ public class GotrRuneTrackerPanel extends PluginPanel
             int value)
     {
         label.setText(
-                Integer.toString(value)
+                Integer.toString(
+                        value
+                )
         );
 
         label.setForeground(
