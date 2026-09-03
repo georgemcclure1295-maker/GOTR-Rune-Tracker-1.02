@@ -23,7 +23,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -173,7 +173,7 @@ public class GotrRuneTrackerPlugin extends Plugin
 
     private boolean isGotrHudVisible()
     {
-        Widget gotrDisplay = client.getWidget(WidgetInfo.GOTR_MAIN_DISPLAY);
+        Widget gotrDisplay = client.getWidget(InterfaceID.GotrHud.CONTENT);
 
         return gotrDisplay != null
                 && !gotrDisplay.isHidden();
@@ -181,10 +181,7 @@ public class GotrRuneTrackerPlugin extends Plugin
 
     private boolean isBankOpen()
     {
-        Widget bank = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
-
-        return bank != null
-                && !bank.isHidden();
+        return client.getWidget(InterfaceID.BANKMAIN, 0) != null;
     }
 
     @Subscribe
